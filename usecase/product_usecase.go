@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"go-api/model"
 	"go-api/repository"
 )
@@ -52,4 +53,27 @@ func (pu *ProductUsecase) Delete(id int) (int, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (pu *ProductUsecase) Update(id int, product model.Product) (model.Product, error) {
+
+	prod, err := pu.GetProductByID(id)
+	if err != nil {
+		fmt.Println(err)
+		return model.Product{}, err //repository.ErrInvalidProductData
+	}
+
+	if product.ID != prod.ID {
+		return model.Product{}, repository.ErrUpdateProductNotFound
+	}
+
+	if product.Name == "" || product.Price <= 0 {
+		return model.Product{}, repository.ErrInvalidProductData
+	}
+
+	updatedProduct, err := pu.repository.Update(product)
+	if err != nil {
+		return model.Product{}, err
+	}
+	return updatedProduct, nil
 }

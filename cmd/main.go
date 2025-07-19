@@ -41,5 +41,7 @@ func main() {
 
 	server.DELETE("/products/:id", productController.Delete)
 
+	server.PUT("/products/:id", productController.Update)
+
 	server.Run(":8000")
 }

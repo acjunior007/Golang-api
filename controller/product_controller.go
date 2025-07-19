@@ -109,3 +109,37 @@ func (pc *ProductController) Delete(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
+
+func (pc *ProductController) Update(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		response := model.Response{Message: "Invalid ID - Null or empty"}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	productID, err := strconv.Atoi(id)
+	if err != nil {
+		response := model.Response{Message: "Invalid ID - Not a number"}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var product model.Product
+	err = ctx.BindJSON(&product)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	updatedProduct, err := pc.productUseCase.Update(productID, product)
+	if err != nil {
+		if err == usecase.ErrInvalidProductData {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product data."})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, updatedProduct)
+}

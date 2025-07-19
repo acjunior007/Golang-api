@@ -8,6 +8,7 @@ import (
 )
 
 var ErrInvalidProductData = errors.New("invalid product data")
+var ErrUpdateProductNotFound = errors.New("id different of the product found to update")
 
 // ... your existing code
 
@@ -104,4 +105,20 @@ func (pr *ProductRepository) Delete(id int) (int, error) {
 	}
 
 	return int(count), nil
+}
+
+func (pr *ProductRepository) Update(product model.Product) (model.Product, error) {
+	query, err := pr.connection.Prepare("UPDATE products SET name = $1, price = $2 WHERE id = $3")
+	if err != nil {
+		fmt.Println("Error preparing query:", err)
+		return model.Product{}, err
+	}
+
+	_, err = query.Exec(product.Name, product.Price, product.ID)
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return model.Product{}, err
+	}
+	query.Close()
+	return product, nil
 }
