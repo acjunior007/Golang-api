@@ -87,3 +87,21 @@ func (pr *ProductRepository) GetProductByID(id int) (*model.Product, error) {
 	query.Close()
 	return &product, nil
 }
+
+func (pr *ProductRepository) Delete(id int) (int, error) {
+
+	query, err := pr.connection.Exec("delete from products where id = $1", id)
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return 0, err
+	}
+
+	count, err := query.RowsAffected()
+
+	if err != nil {
+		fmt.Println("Error getting rows affected:", err)
+		return 0, err
+	}
+
+	return int(count), nil
+}
